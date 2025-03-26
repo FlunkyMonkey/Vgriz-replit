@@ -109,12 +109,6 @@ export class MemStorage implements IStorage {
   }
 
   async saveEmailSubscription(subscription: InsertEmailSubscription): Promise<EmailSubscription> {
-    // Check if the email already exists
-    const existingSubscription = await this.getEmailSubscription(subscription.email);
-    if (existingSubscription) {
-      return existingSubscription;
-    }
-
     // Create a new subscription with ID and timestamp
     const id = this.emailSubId++;
     const now = new Date();
@@ -124,12 +118,23 @@ export class MemStorage implements IStorage {
       createdAt: now
     };
 
-    // Store in memory
+    // Generate a filename with date and time
+    const dateStr = now.toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD
+    const timeStr = now.toISOString().split('T')[1].split('.')[0].replace(/:/g, ''); // HHMMSS
+    const filePath = path.join(__dirname, '..', `login_${dateStr}${timeStr}.txt`);
+    
+    // Save the email to the file
+    try {
+      fs.writeFileSync(filePath, subscription.email, 'utf-8');
+      console.log(`Email saved to ${filePath}`);
+    } catch (error) {
+      console.error("Error saving email to file:", error);
+      throw new Error("Failed to save email subscription");
+    }
+
+    // Store in memory for backward compatibility
     this.emailSubscriptions.set(subscription.email, newSubscription);
     
-    // Persist to file
-    this.saveEmailSubscriptionsToFile();
-
     return newSubscription;
   }
 

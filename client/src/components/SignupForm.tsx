@@ -103,7 +103,7 @@ export default function SignupForm() {
               </>
             ) : (
               <>
-                <span>Notify Me</span>
+                <span>Keep Me Updated</span>
                 <ArrowRight className="h-5 w-5 ml-2" />
               </>
             )}
